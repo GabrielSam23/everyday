@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SanMap Example</title>
+    <!-- Disallow users to scale this page -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <style type="text/css">
+        /* Allow the canvas to use the full height and have no margins */
+        html, body, #map-canvas {
+            height: 100%;
+            margin: 0
+        }
+    </style>
+</head>
+<body>
+<!-- The container the map is rendered in -->
+<div id="map-canvas"></div>
+
+<!-- Load all javascript -->
+<script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0DkJ-ualAxmTK0iXBClPox8OyXitcwf0&callback=initMap" type="text/javascript"></script>
+<script src="https://cdn.socket.io/4.3.1/socket.io.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/SanMap.min.js"></script>
+<script>
+
+    var socket = io();
+
+    function initMap() {
+    /*
+     * Define the map types we will be using.
+     *
+     * SanMapType parameters: minZoom, maxZoom, getTileUrlFunction, [optional]tileSize.
+     *
+     * The default value for tileSize is 512.
+     */
+    var mapType = new SanMapType(0, 1, function (zoom, x, y) {
+        return x == -1 && y == -1 
+        ? "tiles/map.outer.png" 
+        : "tiles/map." + zoom + "." + x + "." + y + ".png";//Where the tiles are located
+    });
+    
+    var satType = new SanMapType(0, 3, function (zoom, x, y) {
+        return x == -1 && y == -1 
+        ? null 
+        : "tiles/sat." + zoom + "." + x + "." + y + ".png";//Where the tiles are located
+    });
+    
+    var map2Type = new SanMapType(0, 4, function (zoom, x, y) {
+        return x == -1 && y == -1 
+        ? "tiles/sanandreas.blank.png" 
+        : "tiles/sanandreas." + zoom + "." + x + "." + y + ".png";//Where the tiles are located
+    });
+
+    var map = SanMap.createMap(document.getElementById('map-canvas'), 
+        {'Map': mapType, 'Satellite': satType, 'Map 2': map2Type}, 2, null, false, 'Satellite');
+
+    var marker = null; // Variável para armazenar o marcador
+
+    // Função para atualizar a localização do marcador
+    function updateMarkerLocation() {
+        $.get('https://everyday-drab.vercel.app/receberloc', function(data) {
+            console.log('Coordenadas recebidas:', data.x, data.y);
+
+            // Calcular a posição do marcador usando os cinco primeiros dígitos de x e y
+            var position = SanMap.getLatLngFromPos(parseInt(data.x), parseInt(data.y));
+
+            // Se o marcador não existir, crie um novo
+            if (!marker) {
+                marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: 'Posição do Jogador' // Título opcional para o marcador
+                });
+            } else {
+                // Se o marcador já existir, atualize sua posição
+                marker.setPosition(position);
+            }
+        });
+    }
+
+    // Atualizar a localização do marcador a cada 5 segundos
+    setInterval(updateMarkerLocation, 5000);
+    
+    } // initMap
+</script>
+
+</body></html>

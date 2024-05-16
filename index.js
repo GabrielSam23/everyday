@@ -15,7 +15,7 @@ const io = socketIo(server);
 // Configure o Body Parser para tratar requisições com JSON
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://maze-banksa.netlify.app',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
   credentials: true
 }));
 
@@ -71,10 +71,6 @@ app.post('/receberloc', async (req, res) => {
     }
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
     console.log(`Jogador: ${data.jogador}`);
-
-    // Pegar os 5 primeiros dígitos de x e y
-    data.bairro.x = data.bairro.x.toString().substring(0, 5);
-    data.bairro.y = data.bairro.y.toString().substring(0, 5);
 
     // Inserir coordenadas no banco de dados
     try {
