@@ -1,32 +1,40 @@
+// Importe as bibliotecas necessárias
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
-const { Client } = require('pg');
+const { Pool } = require('pg');
+const cors = require('cors');
 require('dotenv').config();
 
+// Crie uma instância do Express
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Configuração do Body Parser para tratar requisições com JSON
+// Configure o Body Parser para tratar requisições com JSON
 app.use(bodyParser.json());
-
-// Rota para a página hello.js
-const helloRouter = require('./routes/hello');
-app.use('/hello', helloRouter);
+app.use(cors({
+  origin: 'https://maze-banksa.netlify.app',
+  credentials: true
+}));
 
 // Configuração do PostgreSQL
-const client = new Client({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT,
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
 });
-client.connect();
 
-// Rota para receber coordenadas
+pool.connect();
+
+// Defina a rota para o endpoint /receberloc
+app.get("/", async (req, res) => {
+    res.status(200).json({
+      title: "Express Testing",
+      message: "The app is working properly!",
+    });
+  });
+  
+
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
     if (!data.bairro) {
@@ -51,7 +59,7 @@ app.post('/receberloc', async (req, res) => {
     try {
         const insertQuery = 'INSERT INTO coordenadas (x, y, z, jogador) VALUES ($1, $2, $3, $4)';
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
-        await client.query(insertQuery, values);
+        await pool.query(insertQuery, values);
     } catch (error) {
         console.error('Erro ao inserir coordenadas no banco de dados:', error);
         res.status(500).end('Erro ao inserir coordenadas no banco de dados');
@@ -63,18 +71,7 @@ app.post('/receberloc', async (req, res) => {
     res.end('Mensagem recebida pelo servidor');
 });
 
-// Configuração do Socket.IO
-io.on('connection', (socket) => {
-    console.log('Cliente WebSocket conectado');
-    socket.on('atualizarLocalizacao', (data) => {
-        socket.broadcast.emit('atualizarLocalizacao', data);
-    });
-    socket.on('disconnect', () => {
-        console.log('Cliente WebSocket desconectado');
-    });
-});
-
-// Inicialização do servidor
+// Inicialize o servidor
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Servidor está rodando em http://localhost:${PORT}`);
