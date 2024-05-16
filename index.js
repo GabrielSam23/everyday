@@ -53,6 +53,7 @@ app.get('/receberloc', async (req, res) => {
 });
 
 
+// Defina a rota para o endpoint /receberloc
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
     if (!data.bairro) {
@@ -86,7 +87,8 @@ app.post('/receberloc', async (req, res) => {
 
     io.emit('atualizarLocalizacao', { x: data.bairro.x, y: data.bairro.y });
 
-    res.end('Mensagem recebida pelo servidor');
+    // Responder com os dados recebidos
+    res.status(200).json(data);
 });
 
 // Inicialize o servidor
