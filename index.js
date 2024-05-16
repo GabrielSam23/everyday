@@ -72,6 +72,10 @@ app.post('/receberloc', async (req, res) => {
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
     console.log(`Jogador: ${data.jogador}`);
 
+    // Pegar os 5 primeiros dígitos de x e y
+    data.bairro.x = data.bairro.x.toString().substring(0, 5);
+    data.bairro.y = data.bairro.y.toString().substring(0, 5);
+
     // Inserir coordenadas no banco de dados
     try {
         const insertQuery = 'INSERT INTO coordenadas (x, y, z, jogador) VALUES ($1, $2, $3, $4)';
