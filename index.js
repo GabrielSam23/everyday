@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 require('dotenv').config();
 
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -15,6 +16,10 @@ const pool = new Pool({
     password: process.env.PGPASSWORD,
     port: 5432,
 });
+
+const helloRouter = require('./routes/hello'); // Importa a rota hello.js
+
+app.use('/hello', helloRouter); // Define o caminho /hello para a rota hello.js
 
 app.use(express.static('.'));
 app.use(bodyParser.json());
