@@ -35,6 +35,24 @@ app.get("/", async (req, res) => {
   });
   
 
+// Rota GET para /receberloc
+app.get('/receberloc', async (req, res) => {
+    try {
+        const client = await pool.connect();
+        const result = await client.query('SELECT * FROM coordenadas ORDER BY id DESC LIMIT 1');
+        client.release();
+        if (result.rows.length > 0) {
+            res.status(200).json(result.rows[0]);
+        } else {
+            res.status(404).end('Nenhuma coordenada encontrada');
+        }
+    } catch (error) {
+        console.error('Erro ao obter as coordenadas:', error);
+        res.status(500).end('Erro interno do servidor');
+    }
+});
+
+
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
     if (!data.bairro) {
