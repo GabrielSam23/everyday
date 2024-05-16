@@ -1,0 +1,142 @@
+/* Estilos Personalizados */
+
+/* Navbar */
+.navbar {
+    background-color: #343a40;
+}
+
+.navbar-brand {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    color: #ffffff;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #f8f9fa;
+}
+
+/* Hero Section */
+#hero {
+    background-color: #f8f9fa;
+}
+
+#hero h1 {
+    color: #343a40;
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+
+#hero p {
+    color: #6c757d;
+    font-size: 1.25rem;
+}
+
+/* About Section */
+#about {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+#about h2 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+#about p {
+    font-size: 1.2rem;
+}
+
+/* Services Section */
+#services {
+    background-color: #f8f9fa;
+}
+
+#services h2 {
+    color: #343a40;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.service-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+}
+
+.service-card .card-title {
+    color: #343a40;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.service-card .card-text {
+    color: #6c757d;
+}
+
+/* Map Section */
+#map-section {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+#map-section h2 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.map-container {
+    position: relative;
+    overflow: hidden;
+    padding-top: 56.25%;
+}
+
+.map-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Contact Section */
+#contact {
+    background-color: #f8f9fa;
+}
+
+#contact h2 {
+    color: #343a40;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.contact-form .form-control {
+    border-radius: 10px;
+}
+
+.contact-form textarea {
+    height: 150px;
+}
+
+/* Footer */
+footer {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+footer p {
+    font-size: 1rem;
+}

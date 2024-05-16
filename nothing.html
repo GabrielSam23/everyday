@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Santos Transit</title>
+    <!-- Adicionando Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Adicionando fonte do Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Los Santos Transit</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#about">Sobre</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#services">Serviços</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#contact">Contato</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="hero" class="bg-light py-5 text-center">
+    <div class="container">
+        <h1 class="display-4">Bem-vindo à Los Santos Transit</h1>
+        <p class="lead">Sua solução confiável para transporte público em Los Santos.</p>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h2 class="display-5 mb-4">Sobre Nós</h2>
+                <p class="lead">A Los Santos Transit é uma empresa líder em transporte público na região de Los Santos, fornecendo serviços de qualidade para a comunidade há mais de 20 anos.</p>
+            </div>
+            <div class="col-lg-6 d-flex align-items-center justify-content-center">
+                <img src="https://pbs.twimg.com/profile_images/891779342103138304/vPaHzwXA_400x400.jpg" alt="Sobre Nós" class="img-fluid rounded-circle" width="300">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="bg-light py-5">
+    <div class="container">
+        <h2 class="display-5 text-center mb-5">Nossos Serviços</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm service-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Transporte de Ônibus</h5>
+                        <p class="card-text">Oferecemos uma ampla rede de rotas de ônibus para atender às necessidades de transporte da comunidade.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm service-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Metrô</h5>
+                        <p class="card-text">Nosso sistema de metrô moderno e eficiente facilita o deslocamento pela cidade.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm service-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Transporte de Van</h5>
+                        <p class="card-text">Serviço de transporte de van para rotas especiais e transporte porta a porta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section id="map-section">
+    <div class="container">
+        <h2 class="display-5 text-center mb-5">Mapa</h2>
+        <div class="map-container">
+            <iframe src="map.html" name="map-iframe" width="100%" height="600" frameborder="0"></iframe>
+        </div>
+        <p class="text-center mt-4">Mapa de transporte público em tempo real.</p>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-5 bg-dark text-white">
+    <div class="container">
+        <h2 class="display-5 text-center mb-5">Entre em Contato</h2>
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <form>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Seu Nome">
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Seu Email">
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" placeholder="Sua Mensagem"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Enviar Mensagem</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+        <p>&copy; 2024 Los Santos Transit. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<!-- Scripts Bootstrap e JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
