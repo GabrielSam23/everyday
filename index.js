@@ -26,32 +26,22 @@ const pool = new Pool({
 
 pool.connect();
 
-// Defina a rota para o endpoint /receberloc
-app.get("/", async (req, res) => {
-    res.status(200).json({
-      title: "Express Testing",
-      message: "The app is working properly!",
-    });
-  });
-  
-
-// Rota GET para /receberloc
-app.get('/receberloc', async (req, res) => {
-    try {
-        const client = await pool.connect();
-        const result = await client.query('SELECT * FROM coordenadas ORDER BY id DESC LIMIT 1');
-        client.release();
-        if (result.rows.length > 0) {
-            res.status(200).json(result.rows[0]);
-        } else {
-            res.status(404).end('Nenhuma coordenada encontrada');
-        }
-    } catch (error) {
-        console.error('Erro ao obter as coordenadas:', error);
-        res.status(500).end('Erro interno do servidor');
-    }
+// Cria a tabela 'coordenadas' se ela não existir
+pool.query(`
+  CREATE TABLE IF NOT EXISTS coordenadas (
+    id SERIAL PRIMARY KEY,
+    x NUMERIC,
+    y NUMERIC,
+    z NUMERIC,
+    jogador VARCHAR(255)
+  )
+`, (err, res) => {
+  if (err) {
+    console.error('Erro ao criar a tabela "coordenadas":', err);
+  } else {
+    console.log('Tabela "coordenadas" verificada ou criada com sucesso.');
+  }
 });
-
 
 // Defina a rota para o endpoint /receberloc
 app.post('/receberloc', async (req, res) => {
@@ -63,16 +53,6 @@ app.post('/receberloc', async (req, res) => {
     }
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
     console.log(`Jogador: ${data.jogador}`);
-
-    // Pegar os cinco primeiros dígitos de x e y
-    const x = Math.round(data.bairro.x);
-    const y = Math.round(data.bairro.y);
-    const xFirstFiveDigits = String(x).substring(0, 5);
-    const yFirstFiveDigits = String(y).substring(0, 5);
-
-    // Atualizar as coordenadas para os cinco primeiros dígitos de x e y
-    data.bairro.x = xFirstFiveDigits;
-    data.bairro.y = yFirstFiveDigits;
 
     // Inserir coordenadas no banco de dados
     try {
@@ -91,8 +71,5 @@ app.post('/receberloc', async (req, res) => {
     res.status(200).json(data);
 });
 
-// Inicialize o servidor
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Servidor está rodando em http://localhost:${PORT}`);
-});
+// Exportar o aplicativo Express para o Vercel
+module.exports = app;
