@@ -2,28 +2,31 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
-const { Pool } = require('pg');
+const { Client } = require('pg');
 require('dotenv').config();
-
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-const pool = new Pool({
+
+// Configuração do Body Parser para tratar requisições com JSON
+app.use(bodyParser.json());
+
+// Rota para a página hello.js
+const helloRouter = require('./routes/hello');
+app.use('/hello', helloRouter);
+
+// Configuração do PostgreSQL
+const client = new Client({
     user: process.env.PGUSER,
     host: process.env.PGHOST,
     database: process.env.PGDATABASE,
     password: process.env.PGPASSWORD,
-    port: 5432,
+    port: process.env.PGPORT,
 });
+client.connect();
 
-const helloRouter = require('./routes/hello'); // Importa a rota hello.js
-
-app.use('/hello', helloRouter); // Define o caminho /hello para a rota hello.js
-
-app.use(express.static('.'));
-app.use(bodyParser.json());
-
+// Rota para receber coordenadas
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
     if (!data.bairro) {
@@ -34,29 +37,45 @@ app.post('/receberloc', async (req, res) => {
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
     console.log(`Jogador: ${data.jogador}`);
 
+    // Pegar os cinco primeiros dígitos de x e y
+    const x = Math.round(data.bairro.x);
+    const y = Math.round(data.bairro.y);
+    const xFirstFiveDigits = String(x).substring(0, 5);
+    const yFirstFiveDigits = String(y).substring(0, 5);
+
+    // Atualizar as coordenadas para os cinco primeiros dígitos de x e y
+    data.bairro.x = xFirstFiveDigits;
+    data.bairro.y = yFirstFiveDigits;
+
+    // Inserir coordenadas no banco de dados
     try {
-        const client = await pool.connect();
-        const queryText = 'INSERT INTO coordenadas (x, y, z, jogador) VALUES ($1, $2, $3, $4)';
+        const insertQuery = 'INSERT INTO coordenadas (x, y, z, jogador) VALUES ($1, $2, $3, $4)';
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
-        const result = await client.query(queryText, values);
-        client.release();
-        console.log('Coordenadas salvas no banco de dados.');
-        io.emit('atualizarLocalizacao', { x: data.bairro.x, y: data.bairro.y });
-        res.status(200).end('Coordenadas recebidas e salvas com sucesso.');
-    } catch (err) {
-        console.error('Erro ao salvar coordenadas no banco de dados:', err);
-        res.status(500).end('Erro interno do servidor.');
+        await client.query(insertQuery, values);
+    } catch (error) {
+        console.error('Erro ao inserir coordenadas no banco de dados:', error);
+        res.status(500).end('Erro ao inserir coordenadas no banco de dados');
+        return;
     }
+
+    io.emit('atualizarLocalizacao', { x: data.bairro.x, y: data.bairro.y });
+
+    res.end('Mensagem recebida pelo servidor');
 });
 
+// Configuração do Socket.IO
 io.on('connection', (socket) => {
     console.log('Cliente WebSocket conectado');
+    socket.on('atualizarLocalizacao', (data) => {
+        socket.broadcast.emit('atualizarLocalizacao', data);
+    });
     socket.on('disconnect', () => {
         console.log('Cliente WebSocket desconectado');
     });
 });
 
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-    console.log(`Servidor está rodando em http://localhost:${port}`);
+// Inicialização do servidor
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Servidor está rodando em http://localhost:${PORT}`);
 });
