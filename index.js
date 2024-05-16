@@ -15,7 +15,7 @@ const io = socketIo(server);
 // Configure o Body Parser para tratar requisições com JSON
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app',
   credentials: true
 }));
 
