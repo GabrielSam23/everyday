@@ -60,13 +60,12 @@ app.get('/receberloc', async (req, res) => {
     }
 });
 
-
-// Defina a rota para o endpoint /receberloc
+// Rota POST para /receberloc
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
-    if (!data.bairro) {
-        console.log('Erro: bairro não definido');
-        res.status(400).end('Erro: bairro não definido');
+    if (!data.bairro || !data.jogador) {
+        console.log('Erro: bairro ou jogador não definido');
+        res.status(400).end('Erro: bairro ou jogador não definido');
         return;
     }
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
@@ -89,5 +88,33 @@ app.post('/receberloc', async (req, res) => {
     res.status(200).json(data);
 });
 
-// Exportar o aplicativo Express para o Vercel
-module.exports = app;
+// Rota DELETE para /receberloc
+app.delete('/receberloc', async (req, res) => {
+    const data = req.body;
+    if (!data.jogador) {
+        console.log('Erro: jogador não definido');
+        res.status(400).end('Erro: jogador não definido');
+        return;
+    }
+    console.log(`Excluindo coordenadas do jogador: ${data.jogador}`);
+
+    // Excluir coordenadas do banco de dados
+    try {
+        const deleteQuery = 'DELETE FROM coordenadas WHERE jogador = $1';
+        const values = [data.jogador];
+        await pool.query(deleteQuery, values);
+    } catch (error) {
+        console.error('Erro ao excluir coordenadas no banco de dados:', error);
+        res.status(500).end('Erro ao excluir coordenadas no banco de dados');
+        return;
+    }
+
+    // Responder com sucesso
+    res.status(200).end('Coordenadas excluídas com sucesso');
+});
+
+// Iniciar o servidor
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+    console.log(`Servidor ouvindo na porta ${port}`);
+});
