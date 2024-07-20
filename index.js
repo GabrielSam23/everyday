@@ -15,7 +15,7 @@ const io = socketIo(server);
 // Configure o Body Parser para tratar requisições com JSON
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://celebrated-cranachan-d80877.netlify.app',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
   credentials: true
 }));
 
@@ -24,24 +24,17 @@ const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
 
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('Erro ao conectar ao PostgreSQL:', err);
-    process.exit(-1);
-  } else {
-    console.log('Conexão com o PostgreSQL estabelecida com sucesso.');
-    release();
-  }
-});
+pool.connect();
 
-// Cria a tabela 'coordenadas' se ela não existir e adiciona a restrição de unicidade na coluna 'jogador'
+// Cria a tabela 'coordenadas' se ela não existir
 pool.query(`
   CREATE TABLE IF NOT EXISTS coordenadas (
     id SERIAL PRIMARY KEY,
     x NUMERIC,
     y NUMERIC,
     z NUMERIC,
-    jogador VARCHAR(255) UNIQUE
+    jogador VARCHAR(255),
+    gps_ativo BOOLEAN DEFAULT true
   )
 `, (err, res) => {
   if (err) {
@@ -55,7 +48,7 @@ pool.query(`
 app.get('/receberloc', async (req, res) => {
     try {
         const client = await pool.connect();
-        const result = await client.query('SELECT * FROM coordenadas ORDER BY id DESC');
+        const result = await client.query('SELECT * FROM coordenadas WHERE gps_ativo = true');
         client.release();
         if (result.rows.length > 0) {
             res.status(200).json(result.rows);
@@ -81,14 +74,14 @@ app.post('/receberloc', async (req, res) => {
 
     // Inserir ou atualizar coordenadas no banco de dados
     try {
-        const insertQuery = `
-            INSERT INTO coordenadas (x, y, z, jogador) 
-            VALUES ($1, $2, $3, $4)
+        const upsertQuery = `
+            INSERT INTO coordenadas (x, y, z, jogador, gps_ativo)
+            VALUES ($1, $2, $3, $4, true)
             ON CONFLICT (jogador)
-            DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z = EXCLUDED.z
+            DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z = EXCLUDED.z, gps_ativo = true
         `;
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
-        await pool.query(insertQuery, values);
+        await pool.query(upsertQuery, values);
     } catch (error) {
         console.error('Erro ao inserir ou atualizar coordenadas no banco de dados:', error);
         res.status(500).end('Erro ao inserir ou atualizar coordenadas no banco de dados');
@@ -109,21 +102,21 @@ app.delete('/receberloc', async (req, res) => {
         res.status(400).end('Erro: jogador não definido');
         return;
     }
-    console.log(`Excluindo coordenadas do jogador: ${data.jogador}`);
+    console.log(`Desativando GPS do jogador: ${data.jogador}`);
 
-    // Excluir coordenadas do banco de dados
+    // Desativar GPS no banco de dados
     try {
-        const deleteQuery = 'DELETE FROM coordenadas WHERE jogador = $1';
+        const updateQuery = 'UPDATE coordenadas SET gps_ativo = false WHERE jogador = $1';
         const values = [data.jogador];
-        await pool.query(deleteQuery, values);
+        await pool.query(updateQuery, values);
     } catch (error) {
-        console.error('Erro ao excluir coordenadas no banco de dados:', error);
-        res.status(500).end('Erro ao excluir coordenadas no banco de dados');
+        console.error('Erro ao desativar GPS no banco de dados:', error);
+        res.status(500).end('Erro ao desativar GPS no banco de dados');
         return;
     }
 
     // Responder com sucesso
-    res.status(200).end('Coordenadas excluídas com sucesso');
+    res.status(200).end('GPS desativado com sucesso');
 });
 
 // Iniciar o servidor
