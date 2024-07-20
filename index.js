@@ -15,7 +15,7 @@ const io = socketIo(server);
 // Configure o Body Parser para tratar requisições com JSON
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app',
   credentials: true
 }));
 
@@ -47,10 +47,10 @@ pool.query(`
 app.get('/receberloc', async (req, res) => {
     try {
         const client = await pool.connect();
-        const result = await client.query('SELECT * FROM coordenadas ORDER BY id DESC LIMIT 1');
+        const result = await client.query('SELECT * FROM coordenadas ORDER BY id DESC');
         client.release();
         if (result.rows.length > 0) {
-            res.status(200).json(result.rows[0]);
+            res.status(200).json(result.rows);
         } else {
             res.status(404).end('Nenhuma coordenada encontrada');
         }
