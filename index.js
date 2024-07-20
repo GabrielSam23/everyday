@@ -12,7 +12,7 @@ const io = socketIo(server);
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://celebrated-cranachan-d80877.netlify.app',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
   credentials: true
 }));
 
@@ -74,7 +74,6 @@ app.post('/receberloc', async (req, res) => {
         `;
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
         await pool.query(upsertQuery, values);
-        io.emit('atualizarLocalizacao');
     } catch (error) {
         console.error('Erro ao inserir ou atualizar coordenadas no banco de dados:', error);
         res.status(500).end('Erro ao inserir ou atualizar coordenadas no banco de dados');
@@ -99,7 +98,6 @@ app.delete('/receberloc', async (req, res) => {
         const updateQuery = 'UPDATE coordenadas SET gps_ativo = false WHERE jogador = $1';
         const values = [data.jogador];
         await pool.query(updateQuery, values);
-        io.emit('atualizarLocalizacao');
     } catch (error) {
         console.error('Erro ao desativar GPS no banco de dados:', error);
         res.status(500).end('Erro ao desativar GPS no banco de dados');
@@ -107,13 +105,6 @@ app.delete('/receberloc', async (req, res) => {
     }
 
     res.status(200).end('GPS desativado com sucesso');
-});
-
-io.on('connection', (socket) => {
-    console.log('Novo cliente conectado');
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado');
-    });
 });
 
 const port = process.env.PORT || 3000;
