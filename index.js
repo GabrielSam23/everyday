@@ -24,9 +24,17 @@ const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
 
-pool.connect();
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Erro ao conectar ao PostgreSQL:', err);
+    process.exit(-1);
+  } else {
+    console.log('Conexão com o PostgreSQL estabelecida com sucesso.');
+    release();
+  }
+});
 
-// Cria a tabela 'coordenadas' se ela não existir
+// Cria a tabela 'coordenadas' se ela não existir e adiciona a restrição de unicidade na coluna 'jogador'
 pool.query(`
   CREATE TABLE IF NOT EXISTS coordenadas (
     id SERIAL PRIMARY KEY,
