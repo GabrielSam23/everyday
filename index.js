@@ -33,7 +33,7 @@ pool.query(`
     x NUMERIC,
     y NUMERIC,
     z NUMERIC,
-    jogador VARCHAR(255)
+    jogador VARCHAR(255) UNIQUE
   )
 `, (err, res) => {
   if (err) {
@@ -71,14 +71,19 @@ app.post('/receberloc', async (req, res) => {
     console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
     console.log(`Jogador: ${data.jogador}`);
 
-    // Inserir coordenadas no banco de dados
+    // Inserir ou atualizar coordenadas no banco de dados
     try {
-        const insertQuery = 'INSERT INTO coordenadas (x, y, z, jogador) VALUES ($1, $2, $3, $4)';
+        const insertQuery = `
+            INSERT INTO coordenadas (x, y, z, jogador) 
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (jogador)
+            DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z = EXCLUDED.z
+        `;
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
         await pool.query(insertQuery, values);
     } catch (error) {
-        console.error('Erro ao inserir coordenadas no banco de dados:', error);
-        res.status(500).end('Erro ao inserir coordenadas no banco de dados');
+        console.error('Erro ao inserir ou atualizar coordenadas no banco de dados:', error);
+        res.status(500).end('Erro ao inserir ou atualizar coordenadas no banco de dados');
         return;
     }
 
