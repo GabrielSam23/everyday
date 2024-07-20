@@ -12,7 +12,7 @@ const io = socketIo(server);
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://celebrated-cranachan-d80877.netlify.app/',
+  origin: 'https://celebrated-cranachan-d80877.netlify.app',
   credentials: true
 }));
 
