@@ -27,7 +27,7 @@ const pool = new Pool({
 pool.connect();
 
 // Cria a tabela 'coordenadas' se ela não existir
-pool.query(
+pool.query(`
   CREATE TABLE IF NOT EXISTS coordenadas (
     id SERIAL PRIMARY KEY,
     x NUMERIC,
@@ -35,7 +35,7 @@ pool.query(
     z NUMERIC,
     jogador VARCHAR(255)
   )
-, (err, res) => {
+`, (err, res) => {
   if (err) {
     console.error('Erro ao criar a tabela "coordenadas":', err);
   } else {
@@ -63,13 +63,13 @@ app.get('/receberloc', async (req, res) => {
 // Rota POST para /receberloc
 app.post('/receberloc', async (req, res) => {
     const data = req.body;
-    if (!data.bairro  !data.jogador) {
+    if (!data.bairro || !data.jogador) {
         console.log('Erro: bairro ou jogador não definido');
         res.status(400).end('Erro: bairro ou jogador não definido');
         return;
     }
-    console.log(Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z});
-    console.log(Jogador: ${data.jogador});
+    console.log(`Localização recebida: x=${data.bairro.x}, y=${data.bairro.y}, z=${data.bairro.z}`);
+    console.log(`Jogador: ${data.jogador}`);
 
     // Inserir coordenadas no banco de dados
     try {
@@ -96,7 +96,7 @@ app.delete('/receberloc', async (req, res) => {
         res.status(400).end('Erro: jogador não definido');
         return;
     }
-    console.log(Excluindo coordenadas do jogador: ${data.jogador});
+    console.log(`Excluindo coordenadas do jogador: ${data.jogador}`);
 
     // Excluir coordenadas do banco de dados
     try {
@@ -114,7 +114,7 @@ app.delete('/receberloc', async (req, res) => {
 });
 
 // Iniciar o servidor
-const port = process.env.PORT  3000;
+const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    console.log(Servidor ouvindo na porta ${port});
+    console.log(`Servidor ouvindo na porta ${port}`);
 });
