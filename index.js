@@ -12,7 +12,7 @@ const io = socketIo(server);
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://los-santos-transit.netlify.app/mapa',
+  origin: 'https://los-santos-transit.netlify.app',
   credentials: true
 }));
 
