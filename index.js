@@ -8,7 +8,12 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: "https://los-santos-transit.netlify.app",
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(bodyParser.json());
 app.use(cors({
@@ -37,6 +42,25 @@ pool.query(`
   } else {
     console.log('Tabela "coordenadas" verificada ou criada com sucesso.');
   }
+});
+
+// Adicionar esta conexão Socket.IO
+io.on('connection', (socket) => {
+  console.log('Cliente conectado:', socket.id);
+
+  // Enviar todas as localizações ativas quando um cliente se conecta
+  socket.on('solicitarLocalizacoes', async () => {
+    try {
+      const result = await pool.query('SELECT * FROM coordenadas WHERE gps_ativo = true');
+      socket.emit('todasLocalizacoes', result.rows);
+    } catch (error) {
+      console.error('Erro ao buscar localizações:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado:', socket.id);
+  });
 });
 
 app.get('/receberloc', async (req, res) => {
@@ -71,40 +95,39 @@ app.post('/receberloc', async (req, res) => {
             VALUES ($1, $2, $3, $4, true)
             ON CONFLICT (jogador)
             DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z = EXCLUDED.z, gps_ativo = true
+            RETURNING *
         `;
         const values = [data.bairro.x, data.bairro.y, data.bairro.z, data.jogador];
-        await pool.query(upsertQuery, values);
+        const result = await pool.query(upsertQuery, values);
+        
+        // Emitir para TODOS os clientes conectados
+        io.emit('atualizarLocalizacao', result.rows[0]);
+        
+        res.status(200).json(data);
     } catch (error) {
-        console.error('Erro ao inserir ou atualizar coordenadas no banco de dados:', error);
-        res.status(500).end('Erro ao inserir ou atualizar coordenadas no banco de dados');
-        return;
+        console.error('Erro ao inserir/atualizar coordenadas:', error);
+        res.status(500).end('Erro interno');
     }
-
-    io.emit('atualizarLocalizacao', { x: data.bairro.x, y: data.bairro.y });
-
-    res.status(200).json(data);
 });
 
 app.delete('/receberloc', async (req, res) => {
     const data = req.body;
     if (!data.jogador) {
-        console.log('Erro: jogador não definido');
         res.status(400).end('Erro: jogador não definido');
         return;
     }
-    console.log(`Desativando GPS do jogador: ${data.jogador}`);
 
     try {
-        const updateQuery = 'UPDATE coordenadas SET gps_ativo = false WHERE jogador = $1';
-        const values = [data.jogador];
-        await pool.query(updateQuery, values);
+        await pool.query('UPDATE coordenadas SET gps_ativo = false WHERE jogador = $1', [data.jogador]);
+        
+        // Emitir remoção para todos os clientes
+        io.emit('removerLocalizacao', data.jogador);
+        
+        res.status(200).end('GPS desativado com sucesso');
     } catch (error) {
-        console.error('Erro ao desativar GPS no banco de dados:', error);
-        res.status(500).end('Erro ao desativar GPS no banco de dados');
-        return;
+        console.error('Erro ao desativar GPS:', error);
+        res.status(500).end('Erro interno');
     }
-
-    res.status(200).end('GPS desativado com sucesso');
 });
 
 const port = process.env.PORT || 3000;
