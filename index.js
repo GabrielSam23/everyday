@@ -132,5 +132,6 @@ app.delete('/receberloc', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    console.log(`Servidor ouvindo na porta ${port}`);
+    console.log(`Servidor ouvindoo na porta ${port}`);
 });
+
